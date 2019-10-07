@@ -1,0 +1,18 @@
+---
+title: "p8105_hw3_zc2443"
+output: github_document
+author: "Ziyang Chen"
+date: 10-07-2019
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggridges)
+library(patchwork)
+```
+
+## Question 1
+
+
