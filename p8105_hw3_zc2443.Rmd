@@ -43,4 +43,28 @@ instacart %>%
   scale_y_continuous(breaks = seq(10000,160000,5000)) + #set the break points on y-axis
   labs(x = "Aisle names", y = "Number of items ordered") #name x-axis and y-axis
 ```
+The number of items ordered for Fresh fruits and fresh vegetables aisles are way more than other items.
 
+```{r}
+instacart %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle, product_name) %>% 
+  summarize(tot_order = sum(order_number)) %>% #sum up the times each item is ordered
+  mutate(ord_ranking = min_rank(desc(tot_order))) %>% #assign each number of times each item is ordered a rank under grouping
+  filter(ord_ranking %in% c(1,2,3)) %>% #select only the top 3 ranking
+  arrange(aisle, ord_ranking) %>% 
+  knitr::kable()
+```
+
+The three most popular items of baking ingredients aisle are light brown sugar with 8605 times of order, cane sugar with 6244 times of order, and organic banilla extract with 6003 times of order; those of dog food care are standard size pet waste bags with 675 times of order, beef stew canned dog food with 631 times of order, and snack sticks chicken & rice recipe dog treats with 589 times of order; those of packaged vegetables fruits are organic baby spinach with 171301 times of order, organic rasberries with 113932 times of order, and organic blue berries with 86765 times of order.
+
+```{r}
+instacart %>% 
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% #filter the dataset
+  group_by(product_name, order_dow) %>% 
+  summarize(mean_order_hour_of_day = mean(order_hour_of_day)) %>% #find the mean of order hour of day under grouping
+  pivot_wider(names_from = order_dow, values_from = mean_order_hour_of_day) %>% #untidy the dataset to generate a 2x7 table
+  knitr::kable()
+```
+
+We can see that the mean order hour of day is highest on Tuseday for coffee ice cream and on Wednesday for pink lady apples.
