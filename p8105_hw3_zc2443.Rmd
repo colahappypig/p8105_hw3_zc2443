@@ -105,10 +105,10 @@ In 2002, CT, FL, MA, NC, NJ and PA were observed at 7 or more locations. In 2010
 brfss_smart2010 %>% 
   filter(response == "Excellent") %>% 
   group_by(year, locationabbr, locationdesc) %>% 
-  summarize(avg_data_value = mean(data_value)) %>% 
+  summarize(avg_data_value = mean(data_value)) %>% #caculate the mean value across group
   select(year, locationabbr, locationdesc, avg_data_value) %>% 
   ggplot(aes(x = year, y = avg_data_value)) + geom_line(aes(group = locationabbr)) + 
-  theme_classic() + labs(x = "Year", y = "Average Data Value")
+  theme_classic() + labs(x = "Year", y = "Average Data Value") #make a spaghetti plot
 ```
 
 We can see...a “spaghetti” plot...it is messy
@@ -117,7 +117,7 @@ We can see...a “spaghetti” plot...it is messy
 plot2006 = brfss_smart2010 %>% 
   filter(year == 2006, response %in% c("Excellent", "Very good", "Good", "Fair","Poor"), locationabbr == "NY") %>% 
   ggplot(aes(x = response, y = data_value)) + geom_boxplot() +
-  labs(x = "Response", y = "Data Value", title = "2006")
+  labs(x = "Response", y = "Data Value", title = "2006") 
 
 plot2010 = brfss_smart2010 %>% 
   filter(year == 2010, response %in% c("Excellent", "Very good", "Good", "Fair","Poor"), locationabbr == "NY") %>% 
@@ -128,3 +128,54 @@ plot2006 + plot2010
 ```
 
 We can see that the distribution of data value across five responses group of NY are almost the same for 2006 and 2010. However, the data value for fair response is generally higher in 2006 compared to 2010.
+
+## Question 3
+```{r, message=FALSE}
+accel_data = pols_month = read_csv("accel_data.csv") %>% 
+  janitor::clean_names() %>% #clean variable names
+  mutate(
+    week_day_vs_end = case_when( #create a vriable for weekday vs. weekend
+      day %in% c("Monday","Tuesday","Wednesday","Thursday","Friday") ~ "Weekday",
+      day %in% c("Saturday","Sunday") ~ "Weekend"
+    )
+  ) %>% 
+  select(week, day_id, day, week_day_vs_end, everything()) #re-order the variables
+```
+
+The dataset `accel_data` contains `r nrow(accel_data)` observations with 1444 variables. Among them, 1440 variables are used to record the activity counts for each minute. The other 4 variables are used to describe the week number, the unique day id, the day and whether a day is weekday or weekend.
+
+```{r}
+accel_data %>% 
+  mutate(tot_activity_a_day = rowSums(select(.,activity_1:activity_1440))) %>% #sum up each minute counts
+  select(week, day_id, day, week_day_vs_end, tot_activity_a_day) %>% 
+  mutate(day_int = case_when( #use integer to represent each day for the convinience of arrangement
+    day == "Monday" ~ 1,
+    day == "Tuesday" ~ 2,
+    day == "Wednesday" ~ 3,
+    day == "Thursday" ~ 4,
+    day == "Friday" ~ 5,
+    day == "Saturday" ~ 6,
+    day == "Sunday" ~ 7
+  )) %>% 
+  arrange(week, day_int) %>% 
+  select(week, day, tot_activity_a_day) %>% 
+  pivot_wider(names_from = week, values_from = tot_activity_a_day) %>% 
+  knitr::kable()
+```
+
+I don't see any apparent trend from the table.
+
+```{r, warning=FALSE, message=FALSE}
+accel_data %>% 
+  mutate(tot_activity_a_day = rowSums(select(.,activity_1:activity_1440))) %>% 
+  select(week, day_id, day, week_day_vs_end, tot_activity_a_day) %>% 
+  ggplot(aes(x = week, y = tot_activity_a_day, color = day)) + 
+  geom_point(alpha = 0.5) +
+  geom_smooth(size = 1, se = FALSE) +
+  theme_classic() + 
+  theme(legend.position = "bottom") +
+  labs(x = "Week", y = "Activity counts per day") +
+  scale_y_continuous(labels = scales::comma) #adjust the y-axis label to comma format
+```
+
+From the graph we can hardly see any patterns of the change of activity counts for each day across each week. However, the patient's activity counts are stable on Tuesday and Wednesday through 5 weeks period. On the rest days across 5 weeks, the activity counts keep fluctuating.
