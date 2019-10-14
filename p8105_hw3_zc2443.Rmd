@@ -118,20 +118,15 @@ brfss_smart2010 %>%
 We can see...a “spaghetti” plot...it is messy
 
 ```{r}
-plot2006 = brfss_smart2010 %>% 
-  filter(year == 2006, response %in% c("Excellent", "Very good", "Good", "Fair","Poor"), locationabbr == "NY") %>% 
-  ggplot(aes(x = response, y = data_value)) + geom_boxplot() +
-  labs(x = "Response", y = "Data Value", title = "2006") 
-
-plot2010 = brfss_smart2010 %>% 
-  filter(year == 2010, response %in% c("Excellent", "Very good", "Good", "Fair","Poor"), locationabbr == "NY") %>% 
-  ggplot(aes(x = response, y = data_value)) + geom_boxplot() +
-  labs(x = "Response", y = "Data Value", title = "2010")
-
-plot2006 + plot2010
+brfss_smart2010 %>% 
+  filter(year %in% c(2006,2010), response %in% c("Excellent", "Very good", "Good", "Fair","Poor"), locationabbr == "NY") %>% 
+  ggplot(aes(x = locationdesc, y = data_value, fill = response)) + geom_bar(stat = "identity", position = position_stack(reverse = TRUE)) + coord_flip() +
+  viridis::scale_fill_viridis(discrete = TRUE) +
+  labs(x = "Locations", y = "Percentage", title = "2006 vs. 2010") +
+  facet_grid(~year)
 ```
 
-We can see that the distribution of data value across five responses group of NY are almost the same for 2006 and 2010. However, the data value for fair response is generally higher in 2006 compared to 2010.
+We can see that the distribution of data value across five responses group of NY are almost the same for 2006 and 2010 among each location. 
 
 ## Question 3
 ```{r, message=FALSE}
