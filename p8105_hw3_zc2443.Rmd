@@ -111,7 +111,7 @@ brfss_smart2010 %>%
   group_by(year, locationabbr, locationdesc) %>% 
   summarize(avg_data_value = mean(data_value)) %>% #caculate the mean value across group
   select(year, locationabbr, locationdesc, avg_data_value) %>% 
-  ggplot(aes(x = year, y = avg_data_value)) + geom_line(aes(group = locationabbr)) + 
+  ggplot(aes(x = year, y = avg_data_value, color = locationabbr)) + geom_line(aes(group = locationabbr)) + 
   theme_classic() + labs(x = "Year", y = "Average Data Value") #make a spaghetti plot
 ```
 
